@@ -483,3 +483,15 @@ $RECYCLE.BIN/
 .DS_Store
 Docs/
 .DS_Store
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+*.log
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+*.log
