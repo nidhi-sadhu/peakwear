@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="PeakWear.Api/PeakWear.Api.csproj" />
+  <Project Path="PeakWear.Core/PeakWear.Core.csproj" />
+  <Project Path="PeakWear.Data/PeakWear.Data.csproj" />
+</Solution>
