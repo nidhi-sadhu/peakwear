@@ -1,12 +1,20 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
 })
 export class App {
-  protected readonly title = signal('peakwear-ui');
+  private http = inject(HttpClient);
+  users = signal<any[]>([]);
+  error = signal<string>('');
+
+  constructor() {
+    this.http.get<any[]>('/api/users').subscribe({
+      next: (data) => this.users.set(data),
+      error: (err) => this.error.set(err.message),
+    });
+  }
 }
