@@ -1,0 +1,38 @@
+.auth-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 1rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 1.5rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.name-row {
+  display: flex;
+  gap: 1rem;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.auth-error {
+  color: var(--mat-sys-error);
+  font-size: 0.875rem;
+  margin: 0 0 0.5rem;
+}
+
+mat-card-actions {
+  justify-content: center;
+  font-size: 0.875rem;
+}
