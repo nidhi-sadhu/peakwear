@@ -1,9 +1,15 @@
 import { Routes } from '@angular/router';
-import { Test1 } from './pages/test1/test1';
-import { Test2 } from './pages/test2/test2';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'test1', pathMatch: 'full' },
-  { path: 'test1', component: Test1 },
-  { path: 'test2', component: Test2 },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('@modules/login/feature/login-page/login-page').then((m) => m.LoginPage),
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('@modules/login/feature/register-page/register-page').then((m) => m.RegisterPage),
+  },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
 ];
