@@ -1,11 +1,10 @@
 <h1>PeakWear</h1>
 
-@if (error()) {
-  <p style="color: red">Error: {{ error() }}</p>
-}
+<img src="hero.jpg" alt="Hero" style="max-width: 400px" />
 
-<ul>
-  @for (user of users(); track user.id) {
-    <li>{{ user.displayName }} — {{ user.email }}</li>
-  }
-</ul>
+<nav>
+  <a routerLink="/test1">Test 1</a> |
+  <a routerLink="/test2">Test 2</a>
+</nav>
+
+<router-outlet />
