@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from '@core/auth/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'shop/women', pathMatch: 'full' },
@@ -14,11 +15,13 @@ export const routes: Routes = [
   },
   {
     path: 'account/profile',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('@modules/account/feature/profile-page/profile-page').then((m) => m.ProfilePage),
   },
   {
     path: 'account/orders',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('@modules/account/feature/orders-page/orders-page').then((m) => m.OrdersPage),
   },

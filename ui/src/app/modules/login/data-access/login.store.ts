@@ -3,7 +3,7 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
 import { pipe, switchMap, tap } from 'rxjs';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   AuthResponse,
@@ -37,6 +37,7 @@ export const LoginStore = signalStore(
       authService = inject(AuthService),
       tokenService = inject(TokenService),
       router = inject(Router),
+      route = inject(ActivatedRoute),
     ) => ({
       login: rxMethod<LoginRequest>(
         pipe(
@@ -47,7 +48,9 @@ export const LoginStore = signalStore(
                 next: (response: AuthResponse) => {
                   tokenService.save(response.token, response.user);
                   patchState(store, { currentUser: response.user, isLoading: false });
-                  void router.navigate(['/']);
+
+                  const returnUrl = route.snapshot.queryParams['returnUrl'] ?? '/';
+                  void router.navigateByUrl(returnUrl);
                 },
                 error: (error: HttpErrorResponse) =>
                   patchState(store, {
