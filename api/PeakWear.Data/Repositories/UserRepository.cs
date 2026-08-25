@@ -1,6 +1,4 @@
-using Dapper;
-using Npgsql;
-using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 using PeakWear.Core.DbModels;
 using PeakWear.Core.Services;
 
@@ -8,22 +6,40 @@ namespace PeakWear.Data.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly string _connectionString;
+    private readonly PeakWearDbContext _context;
 
-    public UserRepository(IConfiguration configuration)
+    public UserRepository(PeakWearDbContext context)
     {
-        _connectionString = configuration.GetConnectionString("Default")!;
+        _context = context;
     }
 
-    public async Task<IEnumerable<User>> GetAllAsync()
-    {
-        const string sql = """
-            SELECT id, email, password_hash, display_name, created_at_utc
-            FROM users
-            ORDER BY created_at_utc DESC
-            """;
+    public async Task<IEnumerable<User>> GetAllAsync() =>
+        await _context.Users
+            .AsNoTracking()
+            .OrderByDescending(u => u.CreatedAtUtc)
+            .ToListAsync();
 
-        await using var connection = new NpgsqlConnection(_connectionString);
-        return await connection.QueryAsync<User>(sql);
+    public async Task<User?> GetByEmailAsync(string email) =>
+        await _context.Users
+            .FirstOrDefaultAsync(u => u.Email == email.ToLower());
+
+    public async Task<bool> EmailExistsAsync(string email) =>
+        await _context.Users
+            .AnyAsync(u => u.Email == email.ToLower());
+
+    public async Task<User> AddAsync(User user)
+    {
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+        return user;                   
+    }
+
+    public async Task UpdateLastLoginAsync(Guid userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user is null) return;
+
+        user.LastLoginAtUtc = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
     }
 }
