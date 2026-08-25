@@ -1,0 +1,29 @@
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface UserResponse {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  expiresAtUtc: string;
+  user: UserResponse;
+}
+
+export interface LoginState {
+  currentUser: UserResponse | null;
+  error: string | null;
+}

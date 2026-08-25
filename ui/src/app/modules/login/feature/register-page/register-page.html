@@ -1,0 +1,39 @@
+<h2>Create account</h2>
+
+@if (store.error()) {
+  <p class="error">{{ store.error() }}</p>
+}
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <label>
+    First name
+    <input type="text" formControlName="firstName" autocomplete="given-name" />
+  </label>
+
+  <label>
+    Last name
+    <input type="text" formControlName="lastName" autocomplete="family-name" />
+  </label>
+
+  <label>
+    Email
+    <input type="email" formControlName="email" autocomplete="email" />
+  </label>
+  @if (form.controls.email.touched && form.controls.email.invalid) {
+    <small class="error">Enter a valid email address.</small>
+  }
+
+  <label>
+    Password
+    <input type="password" formControlName="password" autocomplete="new-password" />
+  </label>
+  @if (form.controls.password.touched && form.controls.password.invalid) {
+    <small class="error">Password must be at least 8 characters.</small>
+  }
+
+  <button type="submit" [disabled]="store.isLoading()">
+    {{ store.isLoading() ? 'Creating account…' : 'Create account' }}
+  </button>
+</form>
+
+<p>Already have an account? <a routerLink="/login">Sign in</a></p>
