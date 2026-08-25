@@ -1,18 +1,51 @@
 <header class="header">
   <a class="logo" routerLink="/">PeakWear</a>
 
-  <nav class="header-nav">
-    @if (store.isLoggedIn()) {
-      <span class="user-name">{{ store.fullName() }}</span>
-      <button mat-icon-button (click)="store.logout()" aria-label="Sign out">
-        <mat-icon>logout</mat-icon>
-      </button>
-    } @else {
-      <button mat-icon-button routerLink="/login" aria-label="Sign in">
+  <nav class="header-links">
+    <a routerLink="/shop/women" routerLinkActive="active">Women</a>
+    <a routerLink="/shop/men" routerLinkActive="active">Men</a>
+    <a routerLink="/shop/new" routerLinkActive="active">New</a>
+  </nav>
+
+  <div class="header-actions">
+    <div class="header-actions">
+      <button mat-icon-button [matMenuTriggerFor]="accountMenu" aria-label="Account">
         <mat-icon>person_outline</mat-icon>
       </button>
-    }
-  </nav>
+
+      <mat-menu #accountMenu="matMenu">
+        @if (store.isLoggedIn()) {
+          <div class="menu-header">{{ store.fullName() }}</div>
+          <a mat-menu-item routerLink="/account/profile">
+            <mat-icon>person</mat-icon>
+            <span>Profile</span>
+          </a>
+          <a mat-menu-item routerLink="/account/orders">
+            <mat-icon>receipt_long</mat-icon>
+            <span>Orders</span>
+          </a>
+          <mat-divider />
+          <button mat-menu-item (click)="store.logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sign out</span>
+          </button>
+        } @else {
+          <a mat-menu-item routerLink="/login">
+            <mat-icon>login</mat-icon>
+            <span>Sign in</span>
+          </a>
+          <a mat-menu-item routerLink="/register">
+            <mat-icon>person_add</mat-icon>
+            <span>Create account</span>
+          </a>
+        }
+      </mat-menu>
+
+      <button mat-icon-button routerLink="/cart" aria-label="Cart">
+        <mat-icon>shopping_bag</mat-icon>
+      </button>
+    </div>
+  </div>
 </header>
 
 <main class="content">
