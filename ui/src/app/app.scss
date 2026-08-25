@@ -1,10 +1,9 @@
 .header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 0 2rem;
   height: 60px;
-  background: #f5f3f0; // warm off-white, like the reference
+  background: #f5f3f0;
 }
 
 .logo {
@@ -15,19 +14,41 @@
   text-decoration: none;
 }
 
-.header-nav {
+.header-links {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  gap: 1.75rem;
+  margin-left: 3rem;
+
+  a {
+    font-size: 0.9rem;
+    color: #1a1a1a;
+    text-decoration: none;
+    padding: 0.25rem 0;
+    border-bottom: 2px solid transparent;
+
+    &:hover,
+    &.active {
+      border-bottom-color: #1a1a1a;
+    }
+  }
 }
 
-.user-name {
-  font-size: 0.875rem;
-  color: #4a4a4a;
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto; // pushes icons to the right
 }
 
 .content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+}
+
+.menu-header {
+  padding: 0.75rem 1rem 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4a4a4a;
 }

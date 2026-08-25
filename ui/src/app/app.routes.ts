@@ -1,6 +1,27 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
+  { path: '', redirectTo: 'shop/women', pathMatch: 'full' },
+  {
+    path: 'shop/:category',
+    loadComponent: () =>
+      import('@modules/products/feature/product-list/product-list').then((m) => m.ProductList),
+  },
+  {
+    path: 'cart',
+    loadComponent: () =>
+      import('@modules/cart/feature/cart-page/cart-page').then((m) => m.CartPage),
+  },
+  {
+    path: 'account/profile',
+    loadComponent: () =>
+      import('@modules/account/feature/profile-page/profile-page').then((m) => m.ProfilePage),
+  },
+  {
+    path: 'account/orders',
+    loadComponent: () =>
+      import('@modules/account/feature/orders-page/orders-page').then((m) => m.OrdersPage),
+  },
   {
     path: 'login',
     loadComponent: () =>
@@ -11,5 +32,4 @@ export const routes: Routes = [
     loadComponent: () =>
       import('@modules/login/feature/register-page/register-page').then((m) => m.RegisterPage),
   },
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
 ];
