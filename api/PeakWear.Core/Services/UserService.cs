@@ -1,5 +1,3 @@
-using PeakWear.Core.Models.User;
-
 namespace PeakWear.Core.Services;
 
 public class UserService
@@ -19,7 +17,8 @@ public class UserService
         {
             Id = u.Id,
             Email = u.Email,
-            DisplayName = u.DisplayName
+            FirstName = u.FirstName,
+            LastName = u.LastName
         });
     }
 }

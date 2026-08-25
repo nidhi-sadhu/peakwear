@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PeakWear.Data;
@@ -11,9 +12,11 @@ using PeakWear.Data;
 namespace PeakWear.Data.Migrations
 {
     [DbContext(typeof(PeakWearDbContext))]
-    partial class PeakWearDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260824202013_AddUserProfileTables")]
+    partial class AddUserProfileTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -27,7 +30,8 @@ namespace PeakWear.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("id");
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<string>("City")
                         .IsRequired()
@@ -42,8 +46,10 @@ namespace PeakWear.Data.Migrations
                         .HasColumnName("country_code");
 
                     b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at_utc");
+                        .HasColumnName("created_at_utc")
+                        .HasDefaultValueSql("now()");
 
                     b.Property<bool>("IsDefault")
                         .HasColumnType("boolean")
@@ -73,8 +79,10 @@ namespace PeakWear.Data.Migrations
                         .HasColumnName("state");
 
                     b.Property<DateTime>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at_utc");
+                        .HasColumnName("updated_at_utc")
+                        .HasDefaultValueSql("now()");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
@@ -96,11 +104,14 @@ namespace PeakWear.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("id");
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at_utc");
+                        .HasColumnName("created_at_utc")
+                        .HasDefaultValueSql("now()");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -119,7 +130,9 @@ namespace PeakWear.Data.Migrations
                         .HasColumnName("first_name");
 
                     b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
+                        .HasDefaultValue(true)
                         .HasColumnName("is_active");
 
                     b.Property<DateTime?>("LastLoginAtUtc")
@@ -144,13 +157,17 @@ namespace PeakWear.Data.Migrations
 
                     b.Property<string>("Role")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
+                        .HasDefaultValue("Customer")
                         .HasColumnName("role");
 
                     b.Property<DateTime>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at_utc");
+                        .HasColumnName("updated_at_utc")
+                        .HasDefaultValueSql("now()");
 
                     b.Property<uint>("Version")
                         .IsConcurrencyToken()
@@ -173,11 +190,14 @@ namespace PeakWear.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
-                        .HasColumnName("id");
+                        .HasColumnName("id")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at_utc");
+                        .HasColumnName("created_at_utc")
+                        .HasDefaultValueSql("now()");
 
                     b.Property<bool>("MarketingOptIn")
                         .HasColumnType("boolean")
@@ -200,8 +220,10 @@ namespace PeakWear.Data.Migrations
                         .HasColumnName("size_top");
 
                     b.Property<DateTime>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at_utc");
+                        .HasColumnName("updated_at_utc")
+                        .HasDefaultValueSql("now()");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
