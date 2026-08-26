@@ -1,1 +1,69 @@
-<p>cart-page works!</p>
+<h2>Your bag</h2>
+
+@if (store.error()) {
+  <p class="error">{{ store.error() }}</p>
+}
+
+@if (store.isLoading() && !store.cart()) {
+  <mat-spinner diameter="40" />
+} @else if (store.isEmpty()) {
+  <div class="empty">
+    <p>Your bag is empty.</p>
+    <a mat-flat-button routerLink="/shop/women">Start shopping</a>
+  </div>
+} @else {
+  <div class="cart-layout">
+    <div class="cart-items">
+      @for (item of store.items(); track item.id) {
+        <div class="cart-item">
+          <img [src]="item.imageUrl" [alt]="item.productName" />
+
+          <div class="item-info">
+            <a [routerLink]="['/product', item.productSlug]">{{ item.productName }}</a>
+            <p class="meta">{{ item.colour }} &middot; Size {{ item.size }}</p>
+            <p class="meta sku">{{ item.sku }}</p>
+
+            <div class="qty-row">
+              <button
+                mat-icon-button
+                [disabled]="item.quantity <= 1"
+                (click)="changeQuantity(item.id, item.quantity - 1)"
+              >
+                <mat-icon>remove</mat-icon>
+              </button>
+              <span class="qty">{{ item.quantity }}</span>
+              <button
+                mat-icon-button
+                [disabled]="item.quantity >= item.stockAvailable"
+                (click)="changeQuantity(item.id, item.quantity + 1)"
+              >
+                <mat-icon>add</mat-icon>
+              </button>
+
+              <button mat-button class="remove" (click)="store.remove(item.id)">Remove</button>
+            </div>
+
+            @if (item.quantity >= item.stockAvailable) {
+              <p class="stock-note">Only {{ item.stockAvailable }} available</p>
+            }
+          </div>
+
+          <div class="item-total">{{ item.lineTotal | currency }}</div>
+        </div>
+      }
+    </div>
+
+    <aside class="summary">
+      <h3>Summary</h3>
+      <div class="summary-row">
+        <span>Subtotal ({{ store.itemCount() }} items)</span>
+        <span>{{ store.subtotal() | currency }}</span>
+      </div>
+      <div class="summary-row muted">
+        <span>Shipping</span>
+        <span>Calculated at checkout</span>
+      </div>
+      <button mat-flat-button class="checkout-btn" disabled>Checkout</button>
+    </aside>
+  </div>
+}

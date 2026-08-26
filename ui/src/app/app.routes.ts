@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from '@core/auth/auth.guard';
 
 export const routes: Routes = [
   {
@@ -13,16 +14,19 @@ export const routes: Routes = [
   },
   {
     path: 'cart',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('@modules/cart/feature/cart-page/cart-page').then((m) => m.CartPage),
   },
   {
     path: 'account/profile',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('@modules/account/feature/profile-page/profile-page').then((m) => m.ProfilePage),
   },
   {
     path: 'account/orders',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('@modules/account/feature/orders-page/orders-page').then((m) => m.OrdersPage),
   },
@@ -35,13 +39,6 @@ export const routes: Routes = [
     path: 'register',
     loadComponent: () =>
       import('@modules/login/feature/register-page/register-page').then((m) => m.RegisterPage),
-  },
-  {
-    path: 'product/:slug',
-    loadComponent: () =>
-      import('@modules/products/feature/product-detail/product-detail').then(
-        (m) => m.ProductDetail,
-      ),
   },
   {
     path: 'product/:slug',

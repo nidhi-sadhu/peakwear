@@ -1,11 +1,13 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { CurrencyPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProductStore } from '@modules/products/data-access/product.store';
+import { CartStore } from '@modules/cart/data-access/cart.store';
+import { TokenService } from '@core/auth/token.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -16,6 +18,9 @@ import { ProductStore } from '@modules/products/data-access/product.store';
 export class ProductDetail {
   private route = inject(ActivatedRoute);
   readonly store = inject(ProductStore);
+  private cartStore = inject(CartStore);
+  private tokenService = inject(TokenService);
+  private router = inject(Router);
 
   private slug = toSignal(this.route.paramMap.pipe(map((p) => p.get('slug') ?? '')), {
     initialValue: '',
@@ -59,7 +64,6 @@ export class ProductDetail {
     this.store.loadBySlug(this.slug);
   }
 
-  // Is this size available in the currently chosen colour?
   sizeAvailable(size: string): boolean {
     const colour = this.selectedColour();
     if (!colour) return true;
@@ -72,7 +76,6 @@ export class ProductDetail {
 
   selectColour(colour: string): void {
     this.selectedColour.set(colour);
-    // Clear the size if it isn't available in the new colour
     const size = this.selectedSize();
     if (size && !this.sizeAvailable(size)) this.selectedSize.set(null);
   }
@@ -80,6 +83,21 @@ export class ProductDetail {
   addToCart(): void {
     const variant = this.selectedVariant();
     if (!variant) return;
-    console.log('Add to cart:', variant.sku); // cart comes next
+
+    if (!this.tokenService.isLoggedIn) {
+      sessionStorage.setItem(
+        'pendingCartItem',
+        JSON.stringify({
+          variantId: variant.id,
+          quantity: 1,
+        }),
+      );
+      void this.router.navigate(['/login'], {
+        queryParams: { returnUrl: this.router.url },
+      });
+      return;
+    }
+
+    this.cartStore.add({ variantId: variant.id, quantity: 1 });
   }
 }

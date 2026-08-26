@@ -3,7 +3,7 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { tapResponse } from '@ngrx/operators';
 import { pipe, switchMap, tap } from 'rxjs';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   AuthResponse,
@@ -13,6 +13,7 @@ import {
 } from '../interfaces/login.interfaces';
 import { AuthService } from '../../../core/auth/auth.service';
 import { TokenService } from '../../../core/auth/token.service';
+import { CartStore } from '@modules/cart/data-access/cart.store';
 
 const initialState: LoginState & { isLoading: boolean } = {
   currentUser: null,
@@ -37,6 +38,8 @@ export const LoginStore = signalStore(
       authService = inject(AuthService),
       tokenService = inject(TokenService),
       router = inject(Router),
+      cartStore = inject(CartStore),
+      route = inject(ActivatedRoute),
     ) => ({
       login: rxMethod<LoginRequest>(
         pipe(
@@ -47,7 +50,18 @@ export const LoginStore = signalStore(
                 next: (response: AuthResponse) => {
                   tokenService.save(response.token, response.user);
                   patchState(store, { currentUser: response.user, isLoading: false });
-                  void router.navigate(['/']);
+
+                  // Add whatever they were trying to buy before we sent them here
+                  const pending = sessionStorage.getItem('pendingCartItem');
+                  if (pending) {
+                    sessionStorage.removeItem('pendingCartItem');
+                    cartStore.add(JSON.parse(pending));
+                  } else {
+                    cartStore.load();
+                  }
+
+                  const returnUrl = route.snapshot.queryParams['returnUrl'] ?? '/';
+                  void router.navigateByUrl(returnUrl);
                 },
                 error: (error: HttpErrorResponse) =>
                   patchState(store, {
@@ -73,7 +87,7 @@ export const LoginStore = signalStore(
                 },
                 error: (error: HttpErrorResponse) =>
                   patchState(store, {
-                    error: error.error?.message ?? 'Login failed. Please try again.',
+                    error: error.error?.message ?? 'Registration failed. Please try again.',
                     isLoading: false,
                   }),
               }),
@@ -84,6 +98,7 @@ export const LoginStore = signalStore(
 
       logout: () => {
         tokenService.clear();
+        cartStore.clear();
         patchState(store, { currentUser: null });
         void router.navigate(['/login']);
       },
