@@ -47,7 +47,7 @@ public static class ProductSeeder
                     Colour = colour,
                     Size = size,
                     Sku = $"{prefix}-{colour[..3].ToUpper()}-{size}-{product.Slug[..3].ToUpper()}",
-                    ImageUrl = $"https://picsum.photos/seed/{product.Slug}-{colour}/600/800",
+                    ImageUrl = $"/products/{product.Slug}-{colour.ToLower()}.jpg",
                     Stock = random.Next(0, 12)
                 });
             }
