@@ -32,4 +32,18 @@ export const routes: Routes = [
     loadComponent: () =>
       import('@modules/login/feature/register-page/register-page').then((m) => m.RegisterPage),
   },
+  {
+    path: 'product/:slug',
+    loadComponent: () =>
+      import('@modules/products/feature/product-detail/product-detail').then(
+        (m) => m.ProductDetail,
+      ),
+  },
+  {
+    path: 'product/:slug',
+    loadComponent: () =>
+      import('@modules/products/feature/product-detail/product-detail').then(
+        (m) => m.ProductDetail,
+      ),
+  },
 ];

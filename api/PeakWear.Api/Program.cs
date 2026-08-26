@@ -68,6 +68,12 @@ var app = builder.Build();
 //  top to bottom. Order matters a lot here.
 // ============================================================
 
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<PeakWearDbContext>();
+        await ProductSeeder.SeedAsync(db);
+    }
+
 // Only expose API docs while developing, never in production
 if (app.Environment.IsDevelopment())
 {

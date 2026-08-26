@@ -1,0 +1,46 @@
+.page-title {
+  margin-bottom: 1.5rem;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.product-card {
+  text-decoration: none;
+  color: inherit;
+
+  img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  h3 {
+    font-size: 0.95rem;
+    margin: 0.75rem 0 0.25rem;
+  }
+
+  .swatches {
+    display: flex;
+    gap: 0.35rem;
+    margin: 0 0 0.4rem;
+  }
+
+  .swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    display: inline-block;
+  }
+
+  .price {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0;
+  }
+}

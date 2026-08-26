@@ -1,0 +1,76 @@
+@if (store.isLoading()) {
+  <mat-spinner diameter="40" />
+} @else if (store.error()) {
+  <p class="error">{{ store.error() }}</p>
+} @else if (store.selected(); as product) {
+  <div class="detail">
+    <div class="detail-image">
+      <img [src]="displayImage()" [alt]="product.name" />
+    </div>
+
+    <div class="detail-info">
+      <h1>{{ product.name }}</h1>
+      <p class="price">{{ product.basePrice | currency }}</p>
+      <p class="description">{{ product.description }}</p>
+
+      <div class="option-group">
+        <span class="option-label">
+          Colour
+          @if (selectedColour()) {
+            <em>&mdash; {{ selectedColour() }}</em>
+          }
+        </span>
+        <div class="swatch-row">
+          @for (colour of colours(); track colour) {
+            <button
+              class="swatch"
+              [class.selected]="selectedColour() === colour"
+              [style.background-color]="colour.toLowerCase()"
+              [title]="colour"
+              (click)="selectColour(colour)"
+            ></button>
+          }
+        </div>
+      </div>
+
+      <div class="option-group">
+        <span class="option-label">Size</span>
+        <div class="size-row">
+          @for (size of sizes(); track size) {
+            <button
+              class="size-btn"
+              [class.selected]="selectedSize() === size"
+              [disabled]="!sizeAvailable(size)"
+              (click)="selectedSize.set(size)"
+            >
+              {{ size }}
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (selectedVariant(); as variant) {
+        @if (!variant.inStock) {
+          <p class="stock out">Out of stock</p>
+        } @else if (variant.stock <= 3) {
+          <p class="stock low">Only {{ variant.stock }} left</p>
+        } @else {
+          <p class="stock in">In stock</p>
+        }
+        <p class="sku">SKU: {{ variant.sku }}</p>
+      }
+
+      <button mat-flat-button class="add-btn" [disabled]="!canAddToCart()" (click)="addToCart()">
+        @if (!selectedColour() || !selectedSize()) {
+          Select colour and size
+        } @else if (!canAddToCart()) {
+          Out of stock
+        } @else {
+          Add to bag
+        }
+      </button>
+    </div>
+  </div>
+} @else {
+  <p>Product not found.</p>
+}
