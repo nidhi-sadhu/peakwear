@@ -1,1 +1,30 @@
-<p>product-list works!</p>
+<h2 class="page-title">{{ category() | titlecase }}</h2>
+
+@if (store.isLoading()) {
+  <mat-spinner diameter="40" />
+} @else if (store.error()) {
+  <p class="error">{{ store.error() }}</p>
+} @else {
+  <div class="product-grid">
+    @for (product of store.products(); track product.id) {
+      <a class="product-card" [routerLink]="['/product', product.slug]">
+        <img [src]="product.imageUrl" [alt]="product.name" />
+        <div class="product-info">
+          <h3>{{ product.name }}</h3>
+          <div class="swatches">
+            @for (colour of product.colours; track colour) {
+              <span
+                class="swatch"
+                [style.background-color]="colour.toLowerCase()"
+                [title]="colour"
+              ></span>
+            }
+          </div>
+          <p class="price">{{ product.basePrice | currency }}</p>
+        </div>
+      </a>
+    } @empty {
+      <p>No products found.</p>
+    }
+  </div>
+}
