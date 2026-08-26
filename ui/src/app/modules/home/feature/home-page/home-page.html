@@ -1,0 +1,41 @@
+<section class="hero">
+  <img class="hero-image" src="/hero.jpg" alt="" />
+  <div class="hero-content">
+    <h1>Built for the work.</h1>
+    <p>Technical fabrics for training, running, and everything after.</p>
+    <a mat-flat-button class="hero-cta" routerLink="/shop/women">Shop Women</a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <h2>New Arrivals</h2>
+    <a routerLink="/shop/new">View all</a>
+  </div>
+
+  <div class="product-grid">
+    @for (product of store.products().slice(0, 4); track product.id) {
+      <a class="product-card" [routerLink]="['/product', product.slug]">
+        <img [src]="product.imageUrl" [alt]="product.name" />
+        <h3>{{ product.name }}</h3>
+        <div class="swatches">
+          @for (colour of product.colours; track colour) {
+            <span class="swatch" [style.background-color]="colour.toLowerCase()"></span>
+          }
+        </div>
+        <p class="price">{{ product.basePrice | currency }}</p>
+      </a>
+    }
+  </div>
+</section>
+
+<section class="section">
+  <div class="category-tiles">
+    <a class="tile" routerLink="/shop/women">
+      <span>Women</span>
+    </a>
+    <a class="tile" routerLink="/shop/men">
+      <span>Men</span>
+    </a>
+  </div>
+</section>
