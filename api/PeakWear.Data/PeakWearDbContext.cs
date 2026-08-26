@@ -11,6 +11,8 @@ public class PeakWearDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     public DbSet<Address> Addresses => Set<Address>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
 
     // Only what attributes can't express: SQL-level behaviour and cascade rules.
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -42,5 +44,23 @@ public class PeakWearDbContext : DbContext
             .IsUnique()
             .HasFilter("is_default")
             .HasDatabaseName("ix_addresses_user_default");
+
+        // Money needs explicit precision — the default can be lossy
+        modelBuilder.Entity<Product>()
+            .Property(p => p.BasePrice)
+            .HasPrecision(18, 2);
+
+        // Deleting a product removes its variants
+        modelBuilder.Entity<Product>()
+            .HasMany(p => p.Variants)
+            .WithOne(v => v.Product)
+            .HasForeignKey(v => v.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // A product can't have two variants of the same colour and size
+        modelBuilder.Entity<ProductVariant>()
+            .HasIndex(v => new { v.ProductId, v.Colour, v.Size })
+            .IsUnique()
+            .HasDatabaseName("ix_variants_product_colour_size");
     }
 }
