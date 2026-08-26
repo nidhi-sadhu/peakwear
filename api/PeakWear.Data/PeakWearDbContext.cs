@@ -13,6 +13,7 @@ public class PeakWearDbContext : DbContext
     public DbSet<Address> Addresses => Set<Address>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+    public DbSet<CartItem> CartItems => Set<CartItem>();
 
     // Only what attributes can't express: SQL-level behaviour and cascade rules.
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -62,5 +63,18 @@ public class PeakWearDbContext : DbContext
             .HasIndex(v => new { v.ProductId, v.Colour, v.Size })
             .IsUnique()
             .HasDatabaseName("ix_variants_product_colour_size");
+
+            modelBuilder.Entity<CartItem>(entity =>
+            {
+                entity.HasOne(c => c.User)
+                    .WithMany()
+                    .HasForeignKey(c => c.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(c => c.ProductVariant)
+                    .WithMany()
+                    .HasForeignKey(c => c.ProductVariantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
     }
 }
