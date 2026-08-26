@@ -1,7 +1,11 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'shop/women', pathMatch: 'full' },
+  {
+    path: '',
+    loadComponent: () =>
+      import('@modules/home/feature/home-page/home-page').then((m) => m.HomePage),
+  },
   {
     path: 'shop/:category',
     loadComponent: () =>

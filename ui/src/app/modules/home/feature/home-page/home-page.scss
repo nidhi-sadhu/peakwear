@@ -1,0 +1,137 @@
+.hero {
+  position: relative;
+  // Break out of the .content max-width so the hero runs edge to edge
+  margin: -2rem calc(-50vw + 50%) 3rem;
+  height: 520px;
+  overflow: hidden;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-content {
+  position: absolute;
+  left: 6%;
+  bottom: 12%;
+  color: #fff;
+  max-width: 520px;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
+
+  h1 {
+    font-size: 3.25rem;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin: 0 0 0.75rem;
+  }
+
+  p {
+    font-size: 1.05rem;
+    margin: 0 0 1.5rem;
+  }
+}
+
+.hero-cta {
+  background: #fff !important;
+  color: #1a1a1a !important;
+  border-radius: 999px !important;
+  padding: 0 2rem !important;
+  height: 46px !important;
+}
+
+.section {
+  margin-bottom: 3.5rem;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+
+  h2 {
+    margin: 0;
+  }
+
+  a {
+    font-size: 0.875rem;
+    color: #1a1a1a;
+  }
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.product-card {
+  text-decoration: none;
+  color: inherit;
+
+  img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  h3 {
+    font-size: 0.95rem;
+    margin: 0.75rem 0 0.4rem;
+  }
+
+  .price {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0;
+  }
+}
+
+.swatches {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.4rem;
+}
+
+.swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.category-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tile {
+  position: relative;
+  height: 240px;
+  border-radius: 4px;
+  background: #e8e4df;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: background 0.2s;
+
+  span {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #1a1a1a;
+  }
+
+  &:hover {
+    background: #ddd8d2;
+  }
+}
