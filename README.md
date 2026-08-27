@@ -1,21 +1,27 @@
 # PeakWear
 
-An e-commerce app for athletic wear, built to learn the .NET + Angular stack properly rather than by following a tutorial.
+A full-stack e-commerce app for athletic wear — .NET 10 API, Angular 22 frontend,
+PostgreSQL, JWT auth, and an AI-powered size recommender.
 
-I'm building this in the open and updating it as I go. Auth, the product catalogue, the cart, an AI size recommender, and account management all work end to end. Checkout is next.
+I build in this stack professionally. I built PeakWear to have something end-to-end
+I could point at, and to work with LLM integration properly rather than just reading
+about it — which is the part of this that was genuinely new to me.
 
 ---
 
-## Why I'm building it
+## Why this project
 
-I wanted a project where I understood every decision, not one where I copied a boilerplate and hoped it worked. A few things I've been deliberate about:
+Most portfolio apps stop at CRUD. I wanted the problems that only show up in a real
+domain:
 
-- **Getting the variant model right first.** A pair of leggings isn't one sellable thing — it's nine, one per colour and size, each with its own SKU and stock. Retrofitting that later means rewriting the cart and every stock check.
-- **Schema in source control.** Every table is an EF migration, so a fresh clone plus one command gives you the same database.
-- **Keeping the layers honest.** The business logic project doesn't reference the data project. That's enforced by the compiler, not by discipline.
-- **Abstracting the AI provider.** The size recommender talks to an interface, not to a vendor. That turned out to matter — see below.
-
-It's an e-commerce app because that domain has real problems in it: variants, auth, stock, concurrency. A to-do list doesn't.
+- **Product variants.** A pair of leggings isn't one sellable thing — it's nine, one
+  per colour and size, each with its own SKU and stock. Getting that wrong means
+  rewriting the cart and every stock check later.
+- **AI that isn't a gimmick.** The size recommender solves an actual e-commerce
+  problem. It's behind a provider-agnostic interface, validates model output against
+  real data, and falls back deterministically when the API is unavailable.
+- **Auth done properly.** BCrypt, JWT, an interceptor, route guards — and knowing
+  which of those is a security control and which isn't.
 
 ---
 
