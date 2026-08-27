@@ -33,6 +33,8 @@
         </div>
       </div>
 
+      <app-size-recommender [productSlug]="product.slug" (sizeChosen)="onSizeRecommended($event)" />
+
       <div class="option-group">
         <span class="option-label">Size</span>
         <div class="size-row">

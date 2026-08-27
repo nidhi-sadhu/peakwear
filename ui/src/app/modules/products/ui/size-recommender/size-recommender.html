@@ -1,0 +1,83 @@
+<div class="recommender">
+  <button mat-stroked-button type="button" class="toggle" (click)="toggle()">
+    <mat-icon>straighten</mat-icon>
+    Find my size
+  </button>
+
+  @if (isOpen()) {
+    <div class="panel">
+      <p class="intro">Tell us a bit about you and we'll suggest a size.</p>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="row">
+          <mat-form-field appearance="outline">
+            <mat-label>Height (cm)</mat-label>
+            <input matInput type="number" formControlName="heightCm" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Weight (kg)</mat-label>
+            <input matInput type="number" formControlName="weightKg" />
+          </mat-form-field>
+        </div>
+
+        <div class="row">
+          <mat-form-field appearance="outline">
+            <mat-label>Build</mat-label>
+            <mat-select formControlName="build">
+              @for (build of builds; track build) {
+                <mat-option [value]="build">{{ build }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Preferred fit</mat-label>
+            <mat-select formControlName="fitPreference">
+              @for (fit of fits; track fit) {
+                <mat-option [value]="fit">{{ fit }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <button mat-flat-button type="submit" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <mat-spinner diameter="20" />
+          } @else {
+            Get recommendation
+          }
+        </button>
+      </form>
+
+      @if (error()) {
+        <p class="rec-error">{{ error() }}</p>
+      }
+
+      @if (result(); as rec) {
+        <div class="result">
+          <p class="rec-size">
+            We suggest size <strong>{{ rec.recommendedSize }}</strong>
+          </p>
+          <p class="rec-reason">{{ rec.reasoning }}</p>
+
+          <div class="rec-actions">
+            <button mat-flat-button type="button" (click)="useSize(rec.recommendedSize)">
+              Use size {{ rec.recommendedSize }}
+            </button>
+            @if (rec.alternative) {
+              <button mat-stroked-button type="button" (click)="useSize(rec.alternative)">
+                Try {{ rec.alternative }} instead
+              </button>
+            }
+          </div>
+
+          <p class="disclaimer">
+            This is a guide based on the details you gave us — check the size chart if you're
+            between sizes.
+          </p>
+        </div>
+      }
+    </div>
+  }
+</div>

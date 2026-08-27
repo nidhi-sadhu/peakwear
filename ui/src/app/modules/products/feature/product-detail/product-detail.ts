@@ -8,10 +8,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProductStore } from '@modules/products/data-access/product.store';
 import { CartStore } from '@modules/cart/data-access/cart.store';
 import { TokenService } from '@core/auth/token.service';
+import { SizeRecommender } from '@modules/products/ui/size-recommender/size-recommender';
 
 @Component({
   selector: 'app-product-detail',
-  imports: [CurrencyPipe, MatButtonModule, MatProgressSpinnerModule],
+  imports: [CurrencyPipe, MatButtonModule, MatProgressSpinnerModule, SizeRecommender],
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.scss',
 })
@@ -99,5 +100,9 @@ export class ProductDetail {
     }
 
     this.cartStore.add({ variantId: variant.id, quantity: 1 });
+  }
+
+  onSizeRecommended(size: string): void {
+    this.selectedSize.set(size);
   }
 }
