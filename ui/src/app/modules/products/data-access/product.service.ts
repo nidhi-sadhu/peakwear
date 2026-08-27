@@ -1,7 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ProductDetail, ProductListItem } from '../interfaces/product.interfaces';
+import {
+  ProductDetail,
+  ProductListItem,
+  SizeRecommendation,
+  SizeRecommendationRequest,
+} from '../interfaces/product.interfaces';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
@@ -13,5 +18,9 @@ export class ProductService {
 
   getBySlug(slug: string): Observable<ProductDetail> {
     return this.http.get<ProductDetail>(`/api/products/${slug}`);
+  }
+
+  recommendSize(request: SizeRecommendationRequest): Observable<SizeRecommendation> {
+    return this.http.post<SizeRecommendation>('/api/recommendations/size', request);
   }
 }

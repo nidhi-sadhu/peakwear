@@ -34,3 +34,17 @@ export interface ProductState {
   isLoading: boolean;
   error: string | null;
 }
+
+export interface SizeRecommendationRequest {
+  productSlug: string;
+  heightCm: number;
+  weightKg: number;
+  build: string;
+  fitPreference: string;
+}
+
+export interface SizeRecommendation {
+  recommendedSize: string;
+  reasoning: string;
+  alternative: string | null;
+}
