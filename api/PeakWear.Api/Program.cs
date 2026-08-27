@@ -5,6 +5,8 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using PeakWear.Core.Services;
+using PeakWear.Data.Clients;
 
 // Starts the app and loads config from appsettings.json, user-secrets and env vars
 var builder = WebApplication.CreateBuilder(args);
@@ -59,6 +61,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 // Turns on the [Authorize] attribute — the permission layer
 builder.Services.AddAuthorization();
+
+builder.Services.AddHttpClient<ISizeRecommendationClient, GroqClient>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(20);
+});
 
 // Everything is registered; build the app
 var app = builder.Build();
