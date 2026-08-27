@@ -1,1 +1,200 @@
-<p>profile-page works!</p>
+<h2>Your account</h2>
+
+@if (store.message()) {
+  <p class="banner success">{{ store.message() }}</p>
+}
+@if (store.error()) {
+  <p class="banner error">{{ store.error() }}</p>
+}
+
+<mat-tab-group>
+  <mat-tab label="Details">
+    <mat-card class="panel">
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <div class="row">
+          <mat-form-field appearance="outline">
+            <mat-label>First name</mat-label>
+            <input matInput formControlName="firstName" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Last name</mat-label>
+            <input matInput formControlName="lastName" />
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Phone number</mat-label>
+          <input matInput formControlName="phoneNumber" />
+          @if (profileForm.controls.phoneNumber.hasError('pattern')) {
+            <mat-error>Enter a valid phone number.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput [value]="store.profile()?.email" disabled />
+          <mat-hint>Email can't be changed</mat-hint>
+        </mat-form-field>
+
+        <button mat-flat-button type="submit" [disabled]="store.isLoading()">Save details</button>
+      </form>
+    </mat-card>
+  </mat-tab>
+
+  <mat-tab label="Addresses">
+    <mat-card class="panel">
+      @for (address of store.addresses(); track address.id) {
+        <div class="address">
+          <div>
+            <p class="line">
+              {{ address.line1 }}
+              @if (address.line2) {
+                , {{ address.line2 }}
+              }
+            </p>
+            <p class="meta">
+              {{ address.city }}, {{ address.state }} {{ address.postalCode }},
+              {{ address.countryCode }}
+            </p>
+            @if (address.isDefault) {
+              <span class="tag">Default</span>
+            }
+          </div>
+          <div class="address-actions">
+            <button mat-icon-button (click)="editAddress(address)" aria-label="Edit">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button (click)="store.deleteAddress(address.id)" aria-label="Delete">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </div>
+        </div>
+      } @empty {
+        <p class="empty">No saved addresses yet.</p>
+      }
+
+      @if (showAddressForm()) {
+        <form [formGroup]="addressForm" (ngSubmit)="saveAddress()" class="address-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Address line 1</mat-label>
+            <input matInput formControlName="line1" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Address line 2 (optional)</mat-label>
+            <input matInput formControlName="line2" />
+          </mat-form-field>
+
+          <div class="row">
+            <mat-form-field appearance="outline">
+              <mat-label>City</mat-label>
+              <input matInput formControlName="city" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>State</mat-label>
+              <input matInput formControlName="state" />
+            </mat-form-field>
+          </div>
+
+          <div class="row">
+            <mat-form-field appearance="outline">
+              <mat-label>Postal code</mat-label>
+              <input matInput formControlName="postalCode" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Country</mat-label>
+              <input matInput formControlName="countryCode" maxlength="2" />
+            </mat-form-field>
+          </div>
+
+          <mat-checkbox formControlName="isDefault">Use as default address</mat-checkbox>
+
+          <div class="form-actions">
+            <button mat-flat-button type="submit">Save address</button>
+            <button mat-button type="button" (click)="cancelAddress()">Cancel</button>
+          </div>
+        </form>
+      } @else {
+        <button mat-stroked-button (click)="newAddress()">
+          <mat-icon>add</mat-icon> Add address
+        </button>
+      }
+    </mat-card>
+  </mat-tab>
+
+  <mat-tab label="Preferences">
+    <mat-card class="panel">
+      <form [formGroup]="preferenceForm" (ngSubmit)="savePreferences()">
+        <mat-form-field appearance="outline">
+          <mat-label>Shopping for</mat-label>
+          <mat-select formControlName="shoppingFor">
+            @for (option of shoppingForOptions; track option) {
+              <mat-option [value]="option">{{ option }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <div class="row">
+          <mat-form-field appearance="outline">
+            <mat-label>Usual top size</mat-label>
+            <mat-select formControlName="sizeTop">
+              @for (size of sizes; track size) {
+                <mat-option [value]="size">{{ size }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Usual bottom size</mat-label>
+            <mat-select formControlName="sizeBottom">
+              @for (size of sizes; track size) {
+                <mat-option [value]="size">{{ size }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-checkbox formControlName="marketingOptIn">Send me product news</mat-checkbox>
+
+        <button mat-flat-button type="submit" [disabled]="store.isLoading()">
+          Save preferences
+        </button>
+      </form>
+    </mat-card>
+  </mat-tab>
+
+  <mat-tab label="Password">
+    <mat-card class="panel">
+      <form
+        [formGroup]="passwordForm"
+        (ngSubmit)="changePassword(formDirective)"
+        #formDirective="ngForm"
+      >
+        <mat-form-field appearance="outline">
+          <mat-label>Current password</mat-label>
+          <input
+            matInput
+            type="password"
+            formControlName="currentPassword"
+            autocomplete="current-password"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>New password</mat-label>
+          <input
+            matInput
+            type="password"
+            formControlName="newPassword"
+            autocomplete="new-password"
+          />
+          <mat-hint>At least 8 characters</mat-hint>
+        </mat-form-field>
+
+        <button mat-flat-button type="submit" [disabled]="store.isLoading()">
+          Change password
+        </button>
+      </form>
+    </mat-card>
+  </mat-tab>
+</mat-tab-group>
