@@ -41,14 +41,16 @@
         }
       </mat-menu>
 
-      <button mat-icon-button routerLink="/cart" aria-label="Cart">
-        <mat-icon
-          [matBadge]="cartStore.itemCount().toString()"
-          [matBadgeHidden]="cartStore.itemCount() === 0"
-          matBadgeColor="warn"
-          >shopping_bag</mat-icon
-        >
-      </button>
+      @if (store.isLoggedIn()) {
+        <button mat-icon-button routerLink="/cart" aria-label="Cart">
+          <mat-icon
+            [matBadge]="cartStore.itemCount().toString()"
+            [matBadgeHidden]="cartStore.itemCount() === 0"
+            matBadgeColor="warn"
+            >shopping_bag</mat-icon
+          >
+        </button>
+      }
     </div>
   </div>
 </header>
