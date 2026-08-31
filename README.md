@@ -5,7 +5,7 @@ A full-stack e-commerce app for athletic wear — .NET 10 API, Angular 22 fronte
 I work in this stack professionally. I built PeakWear to have something end-to-end I could point at, and to work with LLM integration properly rather than just reading about it. That last part was genuinely new to me and it's where most of the interesting problems turned up.
 
 
-
+Product detail with AI size recommendation:
 ![Product detail with AI size recommendation](https://github.com/nidhi-sadhu/peakwear/blob/main/docs/screenshots/product_detail.jpg)
 
 ---
@@ -93,7 +93,8 @@ Order items copy the product name, colour, size, SKU and price rather than joini
 
 Products are listed by section with colour swatches. On the detail page, choosing a colour swaps the image and re-evaluates which sizes are actually available — sizes that are out of stock in that colour disable themselves rather than failing at checkout.
 
-![Product listing]([docs/screenshots/product-list.png](https://github.com/nidhi-sadhu/peakwear/blob/main/docs/screenshots/product_detail.jpg)
+Product listing:
+https://github.com/nidhi-sadhu/peakwear/blob/main/docs/screenshots/product_detail.jpg
 
 **Size recommendation**
 
