@@ -93,7 +93,7 @@ Order items copy the product name, colour, size, SKU and price rather than joini
 
 Products are listed by section with colour swatches. On the detail page, choosing a colour swaps the image and re-evaluates which sizes are actually available — sizes that are out of stock in that colour disable themselves rather than failing at checkout.
 
-![Product listing](docs/screenshots/product-list.png)
+![Product listing]([docs/screenshots/product-list.png](https://github.com/nidhi-sadhu/peakwear/blob/main/docs/screenshots/product_detail.jpg)
 
 **Size recommendation**
 
