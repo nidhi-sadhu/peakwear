@@ -14,97 +14,131 @@ public class PeakWearDbContext : DbContext
     public DbSet<Product> Products => Set<Product>();
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
     public DbSet<CartItem> CartItems => Set<CartItem>();
-
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
-    // Only what attributes can't express: SQL-level behaviour and cascade rules.
+    // Only what attributes can't express: SQL-level behaviour, relationships,
+    // decimal precision and partial indexes.
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Postgres' hidden xmin column — optimistic concurrency, no extra column needed
-        modelBuilder.Entity<User>()
-            .Property(u => u.Version)
-            .HasColumnName("xmin")
-            .HasColumnType("xid")
-            .ValueGeneratedOnAddOrUpdate()
-            .IsConcurrencyToken();
+        // ---------- User ----------
+        modelBuilder.Entity<User>(entity =>
+        {
+            // Postgres keeps a hidden xmin column on every row holding the transaction
+            // ID that last wrote it. Mapping it as a concurrency token makes EF add
+            // "WHERE xmin = <value read earlier>" to every UPDATE, so a concurrent
+            // write throws DbUpdateConcurrencyException instead of silently winning.
+            entity.Property(u => u.Version)
+                  .HasColumnName("xmin")
+                  .HasColumnType("xid")
+                  .ValueGeneratedOnAddOrUpdate()
+                  .IsConcurrencyToken();
 
-        // Deleting a user removes their preference and addresses too
-        modelBuilder.Entity<User>()
-            .HasOne(u => u.Preference)
-            .WithOne(p => p.User)
-            .HasForeignKey<UserPreference>(p => p.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            // Deleting a user removes their preference, addresses and cart
+            entity.HasOne(u => u.Preference)
+                  .WithOne(p => p.User)
+                  .HasForeignKey<UserPreference>(p => p.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.Addresses)
-            .WithOne(a => a.User)
-            .HasForeignKey(a => a.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(u => u.Addresses)
+                  .WithOne(a => a.User)
+                  .HasForeignKey(a => a.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
 
-        // Partial unique index — only one default address per user. No attribute for this.
-        modelBuilder.Entity<Address>()
-            .HasIndex(a => a.UserId)
-            .IsUnique()
-            .HasFilter("is_default")
-            .HasDatabaseName("ix_addresses_user_default");
+        // ---------- Address ----------
+        modelBuilder.Entity<Address>(entity =>
+        {
+            // Lookup index — "all addresses for this user"
+            entity.HasIndex(a => a.UserId)
+                  .HasDatabaseName("ix_addresses_user_id");
 
-        // Money needs explicit precision — the default can be lossy
-        modelBuilder.Entity<Product>()
-            .Property(p => p.BasePrice)
-            .HasPrecision(18, 2);
+            // Partial unique index: unique on user_id, but only across rows where
+            // is_default is true. Guarantees one default per user at the database
+            // level. No data-annotation equivalent exists for this.
+            entity.HasIndex(a => a.UserId)
+                  .IsUnique()
+                  .HasFilter("is_default")
+                  .HasDatabaseName("ix_addresses_user_default");
+        });
 
-        // Deleting a product removes its variants
-        modelBuilder.Entity<Product>()
-            .HasMany(p => p.Variants)
-            .WithOne(v => v.Product)
-            .HasForeignKey(v => v.ProductId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // ---------- Product ----------
+        modelBuilder.Entity<Product>(entity =>
+        {
+            // Money needs explicit precision — the provider default can be lossy
+            entity.Property(p => p.BasePrice).HasPrecision(18, 2);
 
-        // A product can't have two variants of the same colour and size
-        modelBuilder.Entity<ProductVariant>()
-            .HasIndex(v => new { v.ProductId, v.Colour, v.Size })
-            .IsUnique()
-            .HasDatabaseName("ix_variants_product_colour_size");
+            entity.HasMany(p => p.Variants)
+                  .WithOne(v => v.Product)
+                  .HasForeignKey(v => v.ProductId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
 
-            modelBuilder.Entity<CartItem>(entity =>
-            {
-                entity.HasOne(c => c.User)
-                    .WithMany()
-                    .HasForeignKey(c => c.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
+        // ---------- ProductVariant ----------
+        modelBuilder.Entity<ProductVariant>(entity =>
+        {
+            // A product can't have two variants of the same colour and size
+            entity.HasIndex(v => new { v.ProductId, v.Colour, v.Size })
+                  .IsUnique()
+                  .HasDatabaseName("ix_variants_product_colour_size");
 
-                entity.HasOne(c => c.ProductVariant)
-                    .WithMany()
-                    .HasForeignKey(c => c.ProductVariantId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
+            // Optimistic concurrency on stock. If two checkouts race for the last
+            // item, the second one's UPDATE matches zero rows and EF throws.
+            entity.Property(v => v.Version)
+                  .HasColumnName("xmin")
+                  .HasColumnType("xid")
+                  .ValueGeneratedOnAddOrUpdate()
+                  .IsConcurrencyToken();
+        });
 
-            modelBuilder.Entity<Order>(entity =>
-            {
-                entity.Property(o => o.Subtotal).HasPrecision(18, 2);
-                entity.Property(o => o.ShippingCost).HasPrecision(18, 2);
-                entity.Property(o => o.Total).HasPrecision(18, 2);
+        // ---------- CartItem ----------
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+            entity.HasOne(c => c.User)
+                  .WithMany()
+                  .HasForeignKey(c => c.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasMany(o => o.Items)
-                    .WithOne(i => i.Order)
-                    .HasForeignKey(i => i.OrderId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
+            // A discontinued variant should disappear from carts
+            entity.HasOne(c => c.ProductVariant)
+                  .WithMany()
+                  .HasForeignKey(c => c.ProductVariantId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
 
-            modelBuilder.Entity<OrderItem>(entity =>
-            {
-                entity.Property(i => i.UnitPrice).HasPrecision(18, 2);
-                entity.Property(i => i.LineTotal).HasPrecision(18, 2);
-            });
+        // ---------- Order ----------
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.Property(o => o.Subtotal).HasPrecision(18, 2);
+            entity.Property(o => o.ShippingCost).HasPrecision(18, 2);
+            entity.Property(o => o.Total).HasPrecision(18, 2);
 
-            // Optimistic concurrency on stock. If two checkouts race for the last item,
-            // the second one's UPDATE matches zero rows and EF throws.
-            modelBuilder.Entity<ProductVariant>()
-                .Property(v => v.Version)
-                .HasColumnName("xmin")
-                .HasColumnType("xid")
-                .ValueGeneratedOnAddOrUpdate()
-                .IsConcurrencyToken();
+            entity.HasMany(o => o.Items)
+                  .WithOne(i => i.Order)
+                  .HasForeignKey(i => i.OrderId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            // Restrict, not Cascade — deleting a user must not silently erase
+            // financial records. The delete fails and forces an explicit decision.
+            entity.HasOne<User>()
+                  .WithMany()
+                  .HasForeignKey(o => o.UserId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ---------- OrderItem ----------
+        modelBuilder.Entity<OrderItem>(entity =>
+        {
+            entity.Property(i => i.UnitPrice).HasPrecision(18, 2);
+            entity.Property(i => i.LineTotal).HasPrecision(18, 2);
+
+            // Referential integrity on the variant, but Restrict so a sold item
+            // can't be deleted out from under its order history. Products are
+            // retired by setting is_active = false, not deleted.
+            entity.HasOne<ProductVariant>()
+                  .WithMany()
+                  .HasForeignKey(i => i.ProductVariantId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
     }
 }
