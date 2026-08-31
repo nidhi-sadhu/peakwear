@@ -47,4 +47,18 @@ export const routes: Routes = [
         (m) => m.ProductDetail,
       ),
   },
+  {
+    path: 'checkout',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('@modules/orders/feature/checkout-page/checkout-page').then((m) => m.CheckoutPage),
+  },
+  {
+    path: 'order-confirmed/:orderId',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('@modules/orders/feature/order-confirmed/order-confirmed').then(
+        (m) => m.OrderConfirmed,
+      ),
+  },
 ];

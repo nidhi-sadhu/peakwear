@@ -15,6 +15,9 @@ public class PeakWearDbContext : DbContext
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
     public DbSet<CartItem> CartItems => Set<CartItem>();
 
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+
     // Only what attributes can't express: SQL-level behaviour and cascade rules.
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -76,5 +79,32 @@ public class PeakWearDbContext : DbContext
                     .HasForeignKey(c => c.ProductVariantId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.Property(o => o.Subtotal).HasPrecision(18, 2);
+                entity.Property(o => o.ShippingCost).HasPrecision(18, 2);
+                entity.Property(o => o.Total).HasPrecision(18, 2);
+
+                entity.HasMany(o => o.Items)
+                    .WithOne(i => i.Order)
+                    .HasForeignKey(i => i.OrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<OrderItem>(entity =>
+            {
+                entity.Property(i => i.UnitPrice).HasPrecision(18, 2);
+                entity.Property(i => i.LineTotal).HasPrecision(18, 2);
+            });
+
+            // Optimistic concurrency on stock. If two checkouts race for the last item,
+            // the second one's UPDATE matches zero rows and EF throws.
+            modelBuilder.Entity<ProductVariant>()
+                .Property(v => v.Version)
+                .HasColumnName("xmin")
+                .HasColumnType("xid")
+                .ValueGeneratedOnAddOrUpdate()
+                .IsConcurrencyToken();
     }
 }

@@ -1,0 +1,143 @@
+.order-list {
+  display: block;
+  max-width: 760px;
+}
+
+.order-panel {
+  margin-bottom: 0.75rem;
+  // Material's expansion panel animates open/closed on its own
+}
+
+mat-panel-title {
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.order-number {
+  font-weight: 500;
+}
+
+.status {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  &.paid {
+    background: #ecfdf5;
+    color: #15803d;
+  }
+  &.pending {
+    background: #fffbeb;
+    color: #b45309;
+  }
+  &.shipped {
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+  &.cancelled {
+    background: #fef2f2;
+    color: #b91c1c;
+  }
+}
+
+mat-panel-description {
+  justify-content: flex-end;
+  gap: 1.5rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+
+  .total {
+    font-weight: 500;
+    color: #1a1a1a;
+  }
+}
+
+.order-body {
+  padding-top: 0.5rem;
+}
+
+.line-item {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f1f1f1;
+
+  img {
+    width: 56px;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    border-radius: 3px;
+  }
+  .name {
+    margin: 0;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+  .meta {
+    margin: 0.2rem 0 0;
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+  .sku {
+    margin: 0.15rem 0 0;
+    font-size: 0.7rem;
+    color: #b0b0b0;
+  }
+}
+
+.totals {
+  padding-top: 1rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  margin-bottom: 0.4rem;
+  max-width: 280px;
+  margin-left: auto;
+
+  &.total {
+    font-weight: 600;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e5e7eb;
+  }
+}
+
+.ship-to {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+
+  .label {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  p {
+    margin: 0.3rem 0 0;
+    font-size: 0.875rem;
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: 4rem 0;
+  p {
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.banner.error {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}

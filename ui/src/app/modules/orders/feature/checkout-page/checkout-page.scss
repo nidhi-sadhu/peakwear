@@ -1,0 +1,139 @@
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 2.5rem;
+  align-items: start;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+
+  h3 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+  }
+}
+
+.address-option {
+  display: block;
+  padding: 0.6rem 0;
+
+  .line {
+    display: block;
+    font-weight: 500;
+  }
+  .meta {
+    display: block;
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+}
+
+.tag {
+  display: inline-block;
+  margin-top: 0.3rem;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.68rem;
+  background: #1a1a1a;
+  color: #fff;
+  border-radius: 3px;
+}
+
+.line-item {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e7eb;
+
+  img {
+    width: 64px;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  .name {
+    margin: 0;
+    font-weight: 500;
+  }
+  .meta {
+    margin: 0.2rem 0 0;
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+}
+
+.summary {
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 1.5rem;
+  position: sticky;
+  top: 1.5rem;
+
+  h3 {
+    margin: 0 0 1rem;
+  }
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-bottom: 0.6rem;
+
+  &.total {
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding-top: 0.75rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .free {
+    color: #15803d;
+    font-style: normal;
+  }
+}
+
+.shipping-nudge {
+  font-size: 0.8rem;
+  color: #b45309;
+  margin: 0 0 0.75rem;
+}
+
+.place-btn {
+  width: 100%;
+  height: 46px;
+  margin-top: 1rem;
+}
+
+.note {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-align: center;
+  margin: 0.75rem 0 0;
+}
+
+.banner.error {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.empty {
+  text-align: center;
+  padding: 4rem 0;
+}
+.empty-note {
+  color: #6b7280;
+  font-size: 0.9rem;
+}

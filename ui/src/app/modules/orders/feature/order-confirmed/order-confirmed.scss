@@ -1,0 +1,148 @@
+.confirmation {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+  animation: fade-up 0.5s ease-out;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tick-wrap {
+  margin-bottom: 1.5rem;
+}
+
+.tick {
+  width: 72px;
+  height: 72px;
+}
+
+// Draw the circle, then the check, by animating stroke-dashoffset from
+// "fully hidden" to "fully drawn"
+.tick-circle {
+  stroke: #15803d;
+  stroke-width: 2;
+  stroke-dasharray: 151; // circumference of r=24
+  stroke-dashoffset: 151;
+  animation: draw 0.5s ease-out forwards;
+}
+
+.tick-check {
+  stroke: #15803d;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: draw 0.3s 0.4s ease-out forwards; // starts after the circle
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+// Respect people who've asked for less motion
+@media (prefers-reduced-motion: reduce) {
+  .confirmation {
+    animation: none;
+  }
+  .tick-circle,
+  .tick-check {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+.order-number {
+  font-size: 1.05rem;
+  font-weight: 500;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.placed {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0 0 2rem;
+}
+
+.panel {
+  padding: 1.5rem;
+  text-align: left;
+}
+
+.line-item {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e7eb;
+
+  img {
+    width: 64px;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  .name {
+    margin: 0;
+    font-weight: 500;
+  }
+  .meta {
+    margin: 0.2rem 0 0;
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+}
+
+.totals {
+  padding-top: 1rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+
+  &.total {
+    font-weight: 600;
+    font-size: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e5e7eb;
+  }
+}
+
+.ship-to {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+
+  .label {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  p {
+    margin: 0.35rem 0 0;
+    font-size: 0.9rem;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
