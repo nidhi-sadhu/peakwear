@@ -106,13 +106,16 @@ Adding to the bag validates against remaining stock. A signed-out shopper who cl
 
 Checkout picks from saved addresses, defaulting to the one marked default. Placing the order decrements stock, creates the order and empties the cart in a single transaction.
 
-![Order confirmation](docs/screenshots/order-confirmed.png)
+
+Order confirmation:
+![Order confirmation](https://github.com/nidhi-sadhu/peakwear/blob/main/docs/screenshots/order_confirmed.png)
 
 **Account**
 
 Profile details, multiple addresses with default handling, shopping preferences, and password change. Order history shows what was bought at the price it was bought for.
 
-![Order history](docs/screenshots/order-history.png)
+Order history:
+![Order history](https://github.com/nidhi-sadhu/peakwear/blob/main/docs/screenshots/order_history.png)
 
 ---
 
