@@ -3,7 +3,9 @@
   <div class="hero-content">
     <h1>Built for the work.</h1>
     <p>Technical fabrics for training, running, and everything after.</p>
-    <a mat-flat-button class="hero-cta" routerLink="/shop/women">Shop Women</a>
+    <a mat-flat-button class="hero-cta" [routerLink]="shopLink()">
+      Shop {{ shopLink() === '/shop/men' ? 'Men' : 'Women' }}
+    </a>
   </div>
 </section>
 
