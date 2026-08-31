@@ -6,7 +6,7 @@ I work in this stack professionally. I built PeakWear to have something end-to-e
 
 
 
-![Product detail with AI size recommendation](docs/screenshots/product-detail.png)
+![Product detail with AI size recommendation]([docs/screenshots/product-detail.png](https://github.com/nidhi-sadhu/peakwear/blob/main/docs/screenshots/product_detail.jpg))
 
 ---
 
