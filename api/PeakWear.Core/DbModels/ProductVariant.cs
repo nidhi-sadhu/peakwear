@@ -32,4 +32,5 @@ public class ProductVariant
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 
     public Product? Product { get; set; }
+    public uint Version { get; set; }
 }
