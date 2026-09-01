@@ -123,7 +123,7 @@ git push
 Run in its own terminal and leave it running:
 
 ```bash
-stripe listen --forward-to localhost:5248/api/webhooks/stripe
+stripe listen --forward-to localhost:5248/api/webhooks/stripe --api-key=sk_test_SECRETKEY
 ```
 
 The signing secret it prints changes every session. Copy it, then:
