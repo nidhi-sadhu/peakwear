@@ -15,4 +15,9 @@ public interface IOrderRepository
     Task<long> NextOrderNumberAsync();
     Task<string?> GetUserEmailAsync(Guid userId);
     Task SetPaymentIntentAsync(Guid orderId, string paymentIntentId);
+
+    Task<bool> TryRecordEventAsync(string eventId, string eventType);
+    Task<Order?> GetByPaymentIntentAsync(string paymentIntentId);
+    Task MarkPaidAsync(Guid orderId);
+    Task MarkFailedAndRestoreStockAsync(Guid orderId);
 }

@@ -117,4 +117,80 @@ public class OrderRepository : IOrderRepository
                     .SetProperty(o => o.StripePaymentIntentId, paymentIntentId)
                     .SetProperty(o => o.UpdatedAtUtc, DateTime.UtcNow));
         }
+
+        // Returns false if we've seen this event before. Stripe retries and can deliver
+        // the same event twice, so this is what stops a cart being cleared twice.
+        public async Task<bool> TryRecordEventAsync(string eventId, string eventType)
+        {
+            if (await _context.ProcessedStripeEvents.AnyAsync(e => e.Id == eventId))
+                return false;
+
+            _context.ProcessedStripeEvents.Add(new ProcessedStripeEvent
+            {
+                Id = eventId,
+                Type = eventType
+            });
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateException)
+            {
+                // Two deliveries arrived at once and the other won the primary key race.
+                return false;
+            }
+        }
+
+        public async Task<Order?> GetByPaymentIntentAsync(string paymentIntentId) =>
+            await _context.Orders
+                .FirstOrDefaultAsync(o => o.StripePaymentIntentId == paymentIntentId);
+
+        // Payment confirmed: the order becomes Paid and the cart finally empties.
+        public async Task MarkPaidAsync(Guid orderId)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            var order = await _context.Orders.FirstAsync(o => o.Id == orderId);
+            order.Status = OrderStatus.Paid;
+            order.PaidAtUtc = DateTime.UtcNow;
+            order.UpdatedAtUtc = DateTime.UtcNow;
+
+            await _context.CartItems
+                .Where(c => c.UserId == order.UserId)
+                .ExecuteDeleteAsync();
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+
+        // Payment declined: give the reserved stock back and leave the cart alone,
+        // so the customer can try again with a different card.
+        public async Task MarkFailedAndRestoreStockAsync(Guid orderId)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            var order = await _context.Orders
+                .Include(o => o.Items)
+                .FirstAsync(o => o.Id == orderId);
+
+            foreach (var item in order.Items)
+            {
+                var variant = await _context.ProductVariants
+                    .FirstOrDefaultAsync(v => v.Id == item.ProductVariantId);
+
+                if (variant is not null)
+                {
+                    variant.Stock += item.Quantity;
+                    variant.UpdatedAtUtc = DateTime.UtcNow;
+                }
+            }
+
+            order.Status = OrderStatus.Failed;
+            order.UpdatedAtUtc = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
 }
