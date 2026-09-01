@@ -83,7 +83,8 @@ Stock lives on the variant, not the product — you can sell out of black-medium
 
 Order items copy the product name, colour, size, SKU and price rather than joining back to the catalogue. An order is a historical record: if a product is renamed, repriced or deleted, past orders have to keep showing what was actually bought and what was actually paid.
 
-<!-- ![Database schema](docs/screenshots/schema.png) -->
+Database schema:
+![Database schema](https://github.com/nidhi-sadhu/peakwear/blob/main/docs/screenshots/schema.png)
 
 ---
 
@@ -94,7 +95,7 @@ Order items copy the product name, colour, size, SKU and price rather than joini
 Products are listed by section with colour swatches. On the detail page, choosing a colour swaps the image and re-evaluates which sizes are actually available — sizes that are out of stock in that colour disable themselves rather than failing at checkout.
 
 Product listing:
-https://github.com/nidhi-sadhu/peakwear/blob/main/docs/screenshots/product_detail.jpg
+![Product listing](https://github.com/nidhi-sadhu/peakwear/blob/main/docs/screenshots/product_list.png)
 
 **Size recommendation**
 
