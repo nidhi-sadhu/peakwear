@@ -67,6 +67,11 @@ builder.Services.AddHttpClient<ISizeRecommendationClient, GroqClient>(client =>
     client.Timeout = TimeSpan.FromSeconds(20);
 });
 
+// Singleton because StripeClient wraps a reusable HttpClient internally — a new
+// one per request would leak sockets. Registered explicitly rather than left to
+// Scrutor, which scans for the Repository/Service naming convention this doesn't match.
+builder.Services.AddSingleton<IPaymentClient, StripePaymentClient>();
+
 // Everything is registered; build the app
 var app = builder.Build();
 

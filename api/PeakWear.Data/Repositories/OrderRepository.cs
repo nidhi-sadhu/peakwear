@@ -55,10 +55,6 @@ public class OrderRepository : IOrderRepository
 
             _context.Orders.Add(order);
 
-            await _context.CartItems
-                .Where(c => c.UserId == userId)
-                .ExecuteDeleteAsync();
-
             // If another checkout changed the same variant since we read it,
             // xmin no longer matches and this throws DbUpdateConcurrencyException.
             await _context.SaveChangesAsync();
@@ -86,4 +82,39 @@ public class OrderRepository : IOrderRepository
             .AsNoTracking()
             .Include(o => o.Items)
             .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
+
+    public async Task<long> NextOrderNumberAsync()
+        {
+            // nextval() is atomic. Two concurrent transactions can never receive the
+            // same value, and it doesn't roll back — gaps from abandoned checkouts
+            // are expected and harmless.
+            await using var command = _context.Database.GetDbConnection().CreateCommand();
+            command.CommandText = "SELECT nextval('order_number_seq')";
+
+            await _context.Database.OpenConnectionAsync();
+            try
+            {
+                return (long)(await command.ExecuteScalarAsync())!;
+            }
+            finally
+            {
+                await _context.Database.CloseConnectionAsync();
+            }
+        }
+
+        public async Task<string?> GetUserEmailAsync(Guid userId) =>
+            await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == userId)
+                .Select(u => u.Email)
+                .FirstOrDefaultAsync();
+
+        public async Task SetPaymentIntentAsync(Guid orderId, string paymentIntentId)
+        {
+            await _context.Orders
+                .Where(o => o.Id == orderId)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(o => o.StripePaymentIntentId, paymentIntentId)
+                    .SetProperty(o => o.UpdatedAtUtc, DateTime.UtcNow));
+        }
 }
