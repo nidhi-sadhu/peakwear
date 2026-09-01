@@ -193,4 +193,47 @@ public class OrderRepository : IOrderRepository
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
         }
+
+    public async Task<List<Order>> GetStalePendingOrdersAsync(DateTime olderThanUtc) =>
+    await _context.Orders
+        .AsNoTracking()
+        .Where(o => o.Status == OrderStatus.Pending && o.CreatedAtUtc < olderThanUtc)
+        .ToListAsync();
+
+// Same as the failed path, but a different status — this one was abandoned
+// rather than declined, and that distinction matters when reading the data later.
+public async Task ExpireAndRestoreStockAsync(Guid orderId)
+{
+    await using var transaction = await _context.Database.BeginTransactionAsync();
+
+    var order = await _context.Orders
+        .Include(o => o.Items)
+        .FirstAsync(o => o.Id == orderId);
+
+    // Re-check inside the transaction. A webhook could have paid this order
+    // in the moment between our query and now.
+    if (order.Status != OrderStatus.Pending)
+    {
+        await transaction.RollbackAsync();
+        return;
+    }
+
+    foreach (var item in order.Items)
+    {
+        var variant = await _context.ProductVariants
+            .FirstOrDefaultAsync(v => v.Id == item.ProductVariantId);
+
+        if (variant is not null)
+        {
+            variant.Stock += item.Quantity;
+            variant.UpdatedAtUtc = DateTime.UtcNow;
+        }
+    }
+
+    order.Status = OrderStatus.Expired;
+    order.UpdatedAtUtc = DateTime.UtcNow;
+
+    await _context.SaveChangesAsync();
+    await transaction.CommitAsync();
+}
 }

@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using PeakWear.Core.Services;
 using PeakWear.Data.Clients;
+using PeakWear.Api.Services;
 
 // Starts the app and loads config from appsettings.json, user-secrets and env vars
 var builder = WebApplication.CreateBuilder(args);
@@ -71,6 +72,8 @@ builder.Services.AddHttpClient<ISizeRecommendationClient, GroqClient>(client =>
 // one per request would leak sockets. Registered explicitly rather than left to
 // Scrutor, which scans for the Repository/Service naming convention this doesn't match.
 builder.Services.AddSingleton<IPaymentClient, StripePaymentClient>();
+
+builder.Services.AddHostedService<PendingOrderSweeper>();
 
 // Everything is registered; build the app
 var app = builder.Build();

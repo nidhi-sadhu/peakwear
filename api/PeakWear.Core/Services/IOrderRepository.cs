@@ -20,4 +20,6 @@ public interface IOrderRepository
     Task<Order?> GetByPaymentIntentAsync(string paymentIntentId);
     Task MarkPaidAsync(Guid orderId);
     Task MarkFailedAndRestoreStockAsync(Guid orderId);
+    Task<List<Order>> GetStalePendingOrdersAsync(DateTime olderThanUtc);
+    Task ExpireAndRestoreStockAsync(Guid orderId);
 }
