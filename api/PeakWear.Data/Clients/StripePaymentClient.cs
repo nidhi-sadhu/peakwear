@@ -28,7 +28,7 @@ public class StripePaymentClient : IPaymentClient
             Amount = amountMinorUnits,
             Currency = currency,
             ReceiptEmail = customerEmail,
-            AutomaticPaymentMethods = new() { Enabled = true },
+            AutomaticPaymentMethods = new() { Enabled = true, AllowRedirects = "never" },
 
             // Metadata is arbitrary key/value stored on the intent. Not used for
             // lookup — it's there so a human debugging in the Stripe dashboard
