@@ -16,7 +16,7 @@ public class Order
 
     public Guid UserId { get; set; }
 
-    // Pending, Paid, Shipped, Cancelled
+    // Pending, Paid, Failed, Expired, Cancelled, Shipped
     [Required, StringLength(24)]
     public string Status { get; set; } = "Pending";
 
@@ -37,4 +37,12 @@ public class Order
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 
     public List<OrderItem> Items { get; set; } = [];
+
+    // Stripe's PaymentIntent id (pi_...). Null until the intent is created.
+    // This is how a webhook finds the order it belongs to.
+    [StringLength(64)]
+    public string? StripePaymentIntentId { get; set; }
+
+    // Set when the order reaches a terminal state. Useful for support.
+    public DateTime? PaidAtUtc { get; set; }
 }

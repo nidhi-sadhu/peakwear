@@ -16,6 +16,7 @@ public class PeakWearDbContext : DbContext
     public DbSet<CartItem> CartItems => Set<CartItem>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<ProcessedStripeEvent> ProcessedStripeEvents => Set<ProcessedStripeEvent>();
 
     // Only what attributes can't express: SQL-level behaviour, relationships,
     // decimal precision and partial indexes.
@@ -113,6 +114,13 @@ public class PeakWearDbContext : DbContext
             entity.Property(o => o.ShippingCost).HasPrecision(18, 2);
             entity.Property(o => o.Total).HasPrecision(18, 2);
 
+            // Webhooks arrive knowing only the PaymentIntent id, so this lookup
+            // must be indexed. Filtered, because most rows are null while pending.
+            entity.HasIndex(o => o.StripePaymentIntentId)
+                  .IsUnique()
+                  .HasFilter("stripe_payment_intent_id IS NOT NULL")
+                  .HasDatabaseName("ix_orders_stripe_payment_intent");
+
             entity.HasMany(o => o.Items)
                   .WithOne(i => i.Order)
                   .HasForeignKey(i => i.OrderId)
@@ -140,5 +148,9 @@ public class PeakWearDbContext : DbContext
                   .HasForeignKey(i => i.ProductVariantId)
                   .OnDelete(DeleteBehavior.Restrict);
         });
+        
+        // Order numbers come from the database, not from COUNT(*). Two concurrent
+        // checkouts calling nextval() can never receive the same value.
+        modelBuilder.HasSequence<int>("order_number_seq").StartsAt(1001).IncrementsBy(1);
     }
 }
