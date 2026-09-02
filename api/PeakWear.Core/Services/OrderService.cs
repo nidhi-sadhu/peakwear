@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using PeakWear.Core.DbModels;
 using PeakWear.Core.Models.Order;
 
@@ -7,10 +8,17 @@ namespace PeakWear.Core.Services;
 public class OrderService
 {
     private readonly IOrderRepository _repository;
+    private readonly IPaymentClient _payments;
+    private readonly string _currency;
     private const decimal FreeShippingThreshold = 150m;
     private const decimal StandardShipping = 9.95m;
 
-    public OrderService(IOrderRepository repository) => _repository = repository;
+    public OrderService(IOrderRepository repository, IPaymentClient payments, IConfiguration config)
+    {
+        _repository = repository;
+        _payments = payments;
+        _currency = config["Stripe:Currency"] ?? "usd";
+    }
 
     public async Task<PlaceOrderResult> PlaceOrderAsync(Guid userId, PlaceOrderRequest request)
     {
@@ -62,7 +70,7 @@ public class OrderService
         {
             OrderNumber = await NextOrderNumberAsync(),
             UserId = userId,
-            Status = "Paid",                 // no payment provider yet
+            Status = OrderStatus.Pending, // was "Paid" — the webhook decides now           
             Subtotal = subtotal,
             ShippingCost = shipping,
             Total = subtotal + shipping,
@@ -82,7 +90,24 @@ public class OrderService
         try
         {
             var placed = await _repository.PlaceOrderAsync(order, stockChanges, userId);
-            return new PlaceOrderResult { Order = Map(placed) };
+            // Stock is now reserved and the order exists. Only after that do we ask
+            // Stripe for money — never inside the transaction, because a network call
+            // to a third party would hold row locks open for the length of it.
+            var email = await _repository.GetUserEmailAsync(userId);
+
+            var intent = await _payments.CreateIntentAsync(
+                Money.ToMinorUnits(placed.Total),
+                _currency,
+                placed.OrderNumber,
+                email);
+
+            await _repository.SetPaymentIntentAsync(placed.Id, intent.PaymentIntentId);
+
+            return new PlaceOrderResult
+            {
+                Order = Map(placed),
+                ClientSecret = intent.ClientSecret
+            };
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -107,12 +132,8 @@ public class OrderService
         return order is null ? null : Map(order);
     }
 
-    // PW-000123 — sequential and readable. A GUID is unusable over the phone.
-    private async Task<string> NextOrderNumberAsync()
-    {
-        var count = await _repository.CountOrdersAsync();
-        return $"PW-{(count + 1001):D6}";
-    }
+    private async Task<string> NextOrderNumberAsync() =>
+        $"PW-{await _repository.NextOrderNumberAsync():D6}";
 
     private static OrderResponse Map(Order o) => new()
     {

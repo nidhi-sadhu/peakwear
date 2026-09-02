@@ -4,10 +4,29 @@
   <p class="banner error">{{ orderStore.error() }}</p>
 }
 
-@if (cartStore.isEmpty()) {
+@if (cartStore.isEmpty() && !orderStore.clientSecret()) {
   <div class="empty">
     <p>Your bag is empty.</p>
     <a mat-flat-button routerLink="/shop/women">Start shopping</a>
+  </div>
+} @else if (orderStore.clientSecret()) {
+  <div class="payment-step">
+    <mat-card class="panel">
+      <h3>Payment</h3>
+      <p class="order-ref">Order {{ orderStore.pendingOrder()?.orderNumber }}</p>
+
+      <div id="payment-element"></div>
+
+      <button mat-flat-button class="place-btn" [disabled]="isPaying()" (click)="pay()">
+        @if (isPaying()) {
+          <mat-spinner diameter="22" />
+        } @else {
+          Pay {{ orderStore.pendingOrder()?.total | currency }}
+        }
+      </button>
+
+      <p class="note">Test card: 4242 4242 4242 4242, any future expiry and CVC.</p>
+    </mat-card>
   </div>
 } @else {
   <div class="checkout-layout">
@@ -101,11 +120,9 @@
         @if (orderStore.isPlacing()) {
           <mat-spinner diameter="22" />
         } @else {
-          Place order
+          Continue to payment
         }
       </button>
-
-      <p class="note">No payment is taken — this is a portfolio project.</p>
     </aside>
   </div>
 }

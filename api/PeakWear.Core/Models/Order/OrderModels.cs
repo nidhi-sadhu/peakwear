@@ -39,4 +39,5 @@ public class PlaceOrderResult
     public OrderResponse? Order { get; set; }
     public string? Error { get; set; }
     public bool Success => Order is not null;
+    public string? ClientSecret { get; set; }
 }

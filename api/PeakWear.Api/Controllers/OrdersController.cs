@@ -24,7 +24,11 @@ public class OrdersController : ControllerBase
     {
         var result = await _orderService.PlaceOrderAsync(UserId, request);
         return result.Success
-            ? Ok(result.Order)
+            ? Ok(new CheckoutResponse
+            {
+                Order = result.Order!,
+                ClientSecret = result.ClientSecret!
+            })
             : Conflict(new { message = result.Error });
     }
 

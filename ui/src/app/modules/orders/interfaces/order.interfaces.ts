@@ -28,4 +28,11 @@ export interface OrderState {
   isPlacing: boolean;
   isLoading: boolean;
   error: string | null;
+  clientSecret: string | null;
+  pendingOrder: Order | null;
+}
+
+export interface CheckoutResponse {
+  order: Order;
+  clientSecret: string;
 }

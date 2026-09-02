@@ -117,3 +117,22 @@ git add .
 git commit -m "feat: add products table"
 git push
 ```
+
+## Stripe (local)
+
+Run in its own terminal and leave it running:
+
+```bash
+stripe listen --forward-to localhost:5248/api/webhooks/stripe --api-key=sk_test_SECRETKEY
+```
+
+The signing secret it prints changes every session. Copy it, then:
+
+```bash
+cd api/PeakWear.Api
+dotnet user-secrets set "Stripe:WebhookSecret" "whsec_..."
+```
+
+Restart the API — config isn't hot-reloaded.
+
+Symptom of a stale secret: the CLI shows a 400 on every event and the order stays Pending.

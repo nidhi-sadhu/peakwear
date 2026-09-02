@@ -55,10 +55,6 @@ public class OrderRepository : IOrderRepository
 
             _context.Orders.Add(order);
 
-            await _context.CartItems
-                .Where(c => c.UserId == userId)
-                .ExecuteDeleteAsync();
-
             // If another checkout changed the same variant since we read it,
             // xmin no longer matches and this throws DbUpdateConcurrencyException.
             await _context.SaveChangesAsync();
@@ -86,4 +82,158 @@ public class OrderRepository : IOrderRepository
             .AsNoTracking()
             .Include(o => o.Items)
             .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
+
+    public async Task<long> NextOrderNumberAsync()
+        {
+            // nextval() is atomic. Two concurrent transactions can never receive the
+            // same value, and it doesn't roll back — gaps from abandoned checkouts
+            // are expected and harmless.
+            await using var command = _context.Database.GetDbConnection().CreateCommand();
+            command.CommandText = "SELECT nextval('order_number_seq')";
+
+            await _context.Database.OpenConnectionAsync();
+            try
+            {
+                return (long)(await command.ExecuteScalarAsync())!;
+            }
+            finally
+            {
+                await _context.Database.CloseConnectionAsync();
+            }
+        }
+
+        public async Task<string?> GetUserEmailAsync(Guid userId) =>
+            await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == userId)
+                .Select(u => u.Email)
+                .FirstOrDefaultAsync();
+
+        public async Task SetPaymentIntentAsync(Guid orderId, string paymentIntentId)
+        {
+            await _context.Orders
+                .Where(o => o.Id == orderId)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(o => o.StripePaymentIntentId, paymentIntentId)
+                    .SetProperty(o => o.UpdatedAtUtc, DateTime.UtcNow));
+        }
+
+        // Returns false if we've seen this event before. Stripe retries and can deliver
+        // the same event twice, so this is what stops a cart being cleared twice.
+        public async Task<bool> TryRecordEventAsync(string eventId, string eventType)
+        {
+            if (await _context.ProcessedStripeEvents.AnyAsync(e => e.Id == eventId))
+                return false;
+
+            _context.ProcessedStripeEvents.Add(new ProcessedStripeEvent
+            {
+                Id = eventId,
+                Type = eventType
+            });
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateException)
+            {
+                // Two deliveries arrived at once and the other won the primary key race.
+                return false;
+            }
+        }
+
+        public async Task<Order?> GetByPaymentIntentAsync(string paymentIntentId) =>
+            await _context.Orders
+                .FirstOrDefaultAsync(o => o.StripePaymentIntentId == paymentIntentId);
+
+        // Payment confirmed: the order becomes Paid and the cart finally empties.
+        public async Task MarkPaidAsync(Guid orderId)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            var order = await _context.Orders.FirstAsync(o => o.Id == orderId);
+            order.Status = OrderStatus.Paid;
+            order.PaidAtUtc = DateTime.UtcNow;
+            order.UpdatedAtUtc = DateTime.UtcNow;
+
+            await _context.CartItems
+                .Where(c => c.UserId == order.UserId)
+                .ExecuteDeleteAsync();
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+
+        // Payment declined: give the reserved stock back and leave the cart alone,
+        // so the customer can try again with a different card.
+        public async Task MarkFailedAndRestoreStockAsync(Guid orderId)
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            var order = await _context.Orders
+                .Include(o => o.Items)
+                .FirstAsync(o => o.Id == orderId);
+
+            foreach (var item in order.Items)
+            {
+                var variant = await _context.ProductVariants
+                    .FirstOrDefaultAsync(v => v.Id == item.ProductVariantId);
+
+                if (variant is not null)
+                {
+                    variant.Stock += item.Quantity;
+                    variant.UpdatedAtUtc = DateTime.UtcNow;
+                }
+            }
+
+            order.Status = OrderStatus.Failed;
+            order.UpdatedAtUtc = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        }
+
+    public async Task<List<Order>> GetStalePendingOrdersAsync(DateTime olderThanUtc) =>
+    await _context.Orders
+        .AsNoTracking()
+        .Where(o => o.Status == OrderStatus.Pending && o.CreatedAtUtc < olderThanUtc)
+        .ToListAsync();
+
+// Same as the failed path, but a different status — this one was abandoned
+// rather than declined, and that distinction matters when reading the data later.
+public async Task ExpireAndRestoreStockAsync(Guid orderId)
+{
+    await using var transaction = await _context.Database.BeginTransactionAsync();
+
+    var order = await _context.Orders
+        .Include(o => o.Items)
+        .FirstAsync(o => o.Id == orderId);
+
+    // Re-check inside the transaction. A webhook could have paid this order
+    // in the moment between our query and now.
+    if (order.Status != OrderStatus.Pending)
+    {
+        await transaction.RollbackAsync();
+        return;
+    }
+
+    foreach (var item in order.Items)
+    {
+        var variant = await _context.ProductVariants
+            .FirstOrDefaultAsync(v => v.Id == item.ProductVariantId);
+
+        if (variant is not null)
+        {
+            variant.Stock += item.Quantity;
+            variant.UpdatedAtUtc = DateTime.UtcNow;
+        }
+    }
+
+    order.Status = OrderStatus.Expired;
+    order.UpdatedAtUtc = DateTime.UtcNow;
+
+    await _context.SaveChangesAsync();
+    await transaction.CommitAsync();
+}
 }
