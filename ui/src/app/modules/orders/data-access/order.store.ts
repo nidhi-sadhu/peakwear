@@ -6,7 +6,7 @@ import { pipe, switchMap, tap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { OrderService } from './order.service';
-import { Order, OrderState } from '../interfaces/order.interfaces';
+import { CheckoutResponse, Order, OrderState } from '../interfaces/order.interfaces';
 import { CartStore } from '@modules/cart/data-access/cart.store';
 
 const initialState: OrderState = {
@@ -15,6 +15,8 @@ const initialState: OrderState = {
   isPlacing: false,
   isLoading: false,
   error: null,
+  clientSecret: null,
+  pendingOrder: null,
 };
 
 export const OrderStore = signalStore(
@@ -34,11 +36,14 @@ export const OrderStore = signalStore(
           switchMap((addressId) =>
             orderService.placeOrder(addressId).pipe(
               tapResponse({
-                next: (order: Order) => {
-                  patchState(store, { lastOrder: order, isPlacing: false });
-                  cartStore.clear(); // the API already emptied it server-side
-                  void router.navigate(['/order-confirmed', order.id]);
-                },
+                // No navigation here any more. The order exists but isn't paid —
+                // the card form appears in place, and the webhook decides the rest.
+                next: (response: CheckoutResponse) =>
+                  patchState(store, {
+                    pendingOrder: response.order,
+                    clientSecret: response.clientSecret,
+                    isPlacing: false,
+                  }),
                 error: (error: HttpErrorResponse) =>
                   patchState(store, {
                     error: error.error?.message ?? 'We could not place your order.',
@@ -80,6 +85,18 @@ export const OrderStore = signalStore(
       ),
 
       clearError: () => patchState(store, { error: null }),
+      // Called once Stripe confirms. The webhook clears the cart server-side;
+      // this just syncs the local state so the badge updates immediately.
+      paymentSucceeded: () => {
+        const order = store.pendingOrder();
+        if (!order) return;
+        cartStore.clear();
+        patchState(store, { clientSecret: null, pendingOrder: null });
+        void router.navigate(['/order-confirmed', order.id]);
+      },
+
+      paymentFailed: (message: string) =>
+        patchState(store, { error: message, clientSecret: null, pendingOrder: null }),
     }),
   ),
 );

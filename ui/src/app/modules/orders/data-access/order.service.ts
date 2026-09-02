@@ -1,14 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Order } from '../interfaces/order.interfaces';
+import { CheckoutResponse, Order } from '../interfaces/order.interfaces';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
   private http = inject(HttpClient);
 
-  placeOrder(addressId: string): Observable<Order> {
-    return this.http.post<Order>('/api/orders', { addressId });
+  placeOrder(addressId: string): Observable<CheckoutResponse> {
+    return this.http.post<CheckoutResponse>('/api/orders', { addressId });
   }
 
   getOrders(): Observable<Order[]> {
