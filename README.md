@@ -280,11 +280,7 @@ The parts I actually learned from.
  
 ## Notes
  
-Commands I use day to day are in [docs/COMMANDS.md](docs/COMMANDS.md).
- 
-A longer write-up of the payment work — how Stripe fits together, the decisions behind the order lifecycle, and the interview questions each one invites — is in [docs/PeakWear-Payments-Doc.pdf](docs/PeakWear-Payments-Doc.pdf). There's an equivalent one for [authentication](docs/PeakWear-Login-Doc.pdf).
- 
+Commands I use day to day are in [docs/COMMANDS.md](docs/COMMANDS.md). 
 Stripe runs in test mode only. No real money moves, and no live keys exist for this project.
- 
 Product photos are placeholders from free stock libraries and aren't PeakWear's own.
  
